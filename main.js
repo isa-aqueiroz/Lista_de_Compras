@@ -5,8 +5,22 @@ const form = document.getElementById("form-itens")
 const itensInput = document.getElementById("receber-item")
 const ulItens = document.getElementById("lista-de-itens")
 const ulItensComprados = document.getElementById("itens-comprados")
+const listaRecuperada = localStorage.getItem('listaDeItens')
 
-form.addEventListener("submit", function (evento) {
+function atualizaLocalStorage() {
+    localStorage.setItem('listaDeItens', JSON.stringify(listaDeItens))
+}
+
+// (valores omitidos, 0, null, NaN, undefined, "", false) << retornam false
+
+if (listaRecuperada) {
+    listaDeItens = JSON.parse(listaRecuperada)
+    mostrarItem()
+} else {
+    listaDeItens = []
+}
+
+form.addEventListener("submit", function(evento) {
     evento.preventDefault()
     salvarItem()
     mostrarItem()
@@ -17,25 +31,25 @@ function salvarItem() {
     const comprasItem = itensInput.value
     const checarDuplicado = listaDeItens.some((elemento) => elemento.valor.toUpperCase() === comprasItem.toUpperCase())
 
-    if(checarDuplicado) {
+    if (checarDuplicado) {
         alert("Item já existe")
     } else {
-    listaDeItens.push({
-        valor: comprasItem,
-        checar: false
-    })
-}
+        listaDeItens.push({
+            valor: comprasItem,
+            checar: false
+        })
+    }
 
     itensInput.value = ''
 }
 
-function mostrarItem(){
+function mostrarItem() {
     ulItens.innerHTML = ''
     ulItensComprados.innerHTML = ''
 
     listaDeItens.forEach((elemento, index) => {
-        if(elemento.checar) {
-        ulItensComprados.innerHTML += `
+        if (elemento.checar) {
+            ulItensComprados.innerHTML += `
     <li class="item-compra is-flex is-justify-content-space-between" data-value="${index}">
         <div>
             <input type="checkbox" checked class="is-clickable" />  
@@ -47,20 +61,20 @@ function mostrarItem(){
     </li>
         `
         } else {
-        ulItens.innerHTML += `
+            ulItens.innerHTML += `
     <li class="item-compra is-flex is-justify-content-space-between" data-value="${index}">
         <div>
             <input type="checkbox" class="is-clickable" />
-            <input type="text" class="is-size-5" value="${elemento.valor}" ${index !== Number(itemAEditar) ? 'disabled' : ''}></input>
+            <input type="text" class="is-size-5" value="${elemento.valor}" ${index !== Number(itemAEditar) ? 'disabled' : ''}> </input>
         </div>
-
+        </div>
         <div>
-            ${ index === Number(itemAEditar) ? '<button onclick="salvarEdicao()"><i class="fa-regular fa-floppy-disk is-clickable"></i></button>' : '<i class="fa-regular is-clickable fa-pen-to-square editar"></i>'}
+            ${index === Number(itemAEditar) ? '<button onclick="salvarEdicao()"><i class="fa-regular fa-floppy-disk is-clickable"></i></button>' : '<i class="fa-regular is-clickable fa-pen-to-square editar"></i> '}
             <i class="fa-solid fa-trash is-clickable deletar"></i>
         </div>
     </li>
     `
-    }
+        }
     })
 
     const inputsCheck = document.querySelectorAll('input[type="checkbox"]')
@@ -78,27 +92,30 @@ function mostrarItem(){
     deletarObjetos.forEach(i => {
         i.addEventListener('click', (evento) => {
             valorDoElemento = evento.target.parentElement.parentElement.getAttribute('data-value')
-            listaDeItens.splice(valorDoElemento,1)
+            listaDeItens.splice(valorDoElemento, 1)
             mostrarItem()
         })
-    })    
+    })
 
-    const editarItens = document.querySelectorAll(".editar")
+    const editarItens = document.querySelectorAll('.editar')
 
     editarItens.forEach(i => {
         i.addEventListener('click', (evento) => {
             itemAEditar = evento.target.parentElement.parentElement.getAttribute('data-value')
             mostrarItem()
-        })
-    })  
+        });
+
+    });
+
+    atualizaLocalStorage()
 
 }
 
 function salvarEdicao() {
     const itemEditado = document.querySelector(`[data-value="${itemAEditar}"] input[type="text"]`)
     // console.log(itemEditado.value)
-    listaDeItens[itemAEditar].valor = itemEditado.value
+    listaDeItens[itemAEditar].valor = itemEditado.value;
     console.log(listaDeItens)
-    itemAEditar = -1
+    itemAEditar = -1;
     mostrarItem()
 }
